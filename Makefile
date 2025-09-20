@@ -9,3 +9,10 @@ serve:
 phpstan:
 	./vendor/bin/sail php ./vendor/bin/phpstan analyse
 
+
+# check the code for style, architecture and complexity
+insights:
+	./vendor/bin/sail php ./vendor/bin/phpinsights analyse
+# fix the code style issues automatically
+insights-fix:
+	./vendor/bin/sail php ./vendor/bin/phpinsights analyse --fix
