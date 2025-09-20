@@ -48,8 +48,9 @@ services:
                 - '${DB_DATABASE}'
                 - '-U'
                 - '${DB_USERNAME}'
-            retries: 3
-            timeout: 5s
+            retries: 5
+            timeout: 3s
+            interval: 5s
     redis:
         image: 'redis:alpine'
         ports:
@@ -63,8 +64,9 @@ services:
                 - CMD
                 - redis-cli
                 - ping
-            retries: 3
-            timeout: 5s
+            retries: 5
+            timeout: 3s
+            interval: 5s
     mailpit:
         image: 'axllent/mailpit:latest'
         ports:
