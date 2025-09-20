@@ -1,5 +1,11 @@
+# Start watching on changes in file ==> on detect tests are triggered
 test-dev:
-	sail php ./vendor/bin/phpunit-watcher watch
+	./vendor/bin/sail php ./vendor/bin/phpunit-watcher watch
+
+# Start the development php server
 serve:
-	sail composer dev
+	./vendor/bin/sail composer dev
+# Start static code quality analysis of the project
+phpstan:
+	./vendor/bin/sail php ./vendor/bin/phpstan analyse
 
