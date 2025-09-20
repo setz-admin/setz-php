@@ -14,6 +14,14 @@ class User extends Authenticatable
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
+
+    /**
+     * Don't use timestamps.
+     */
+    public $timestamps = false;
+
+
+
     /**
      * The attributes that are mass assignable.
      *
