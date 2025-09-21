@@ -5,9 +5,14 @@
 test-dev:
 	./vendor/bin/sail php ./vendor/bin/phpunit-watcher watch
 
+# Start the development vue server
+vue_serve:
+	./vendor/bin/sail composer dev
+
+
 # Start the development php server
 serve:
-	./vendor/bin/sail composer dev
+	./vendor/bin/sail up
 
 #
 # Testing

@@ -19,5 +19,12 @@ class DatabaseSeeder extends Seeder
             'name' => 'Test User',
             'email' => 'test@example.com',
         ]);
+        // Rufe die Seeder in der richtigen Reihenfolge auf.
+        $this->call([
+            CustomerSeeder::class,
+            EmployeeSeeder::class,
+            AppointmentSeeder::class,
+            // Services, Invoices, etc. können durch die Factories in den anderen Seedern erstellt werden.
+        ]);
     }
 }
