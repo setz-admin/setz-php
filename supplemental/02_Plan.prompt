@@ -1,0 +1,92 @@
+Erstelle einen Plan, um das zuvor beschriebene ERM mit laravel zu implementieren
+
+
+====
+Basierend auf dem entworfenen ER-Modell folgt ein klarer Plan zur Implementierung mit Laravel.
+
+---
+
+### 1. Einrichtung und Konfiguration
+
+1.  **Erstelle ein neues Laravel-Projekt**: Starte mit `laravel new mini-corp`.
+2.  **Konfiguriere die `.env`-Datei**: Trage die Datenbankverbindungsinformationen ein.
+3.  **Installiere Laravel Sail (optional, aber empfohlen)**: `php artisan sail:install mysql`. Dies richtet eine konsistente Entwicklungsumgebung mit Docker ein.
+
+---
+
+### 2. Generierung der Modelle und Migrationen
+
+Nutze die **Artisan**-Befehle, um alle notwendigen Klassen zu erstellen. Wir beginnen mit den Hauptentitäten.
+
+* **`customers`**: `sail artisan make:model Customer --factory --migration`
+* **`employees`**: `sail artisan make:model Employee --factory --migration`
+* **`appointments`**: `sail artisan make:model Appointment --factory --migration`
+* **`invoices`**: `sail artisan make:model Invoice --factory --migration`
+* **`services`**: `sail artisan make:model Service --factory --migration`
+* **`invoice_service`**: Da dies eine Pivot-Tabelle ist, erstellen wir nur die Migration: `sail artisan make:migration create_invoice_service_table --create=invoice_service`.
+
+---
+
+### 3. Implementierung der Migrationen
+
+Öffne die generierten Migrationsdateien in `database/migrations` und definiere die Spalten basierend auf dem ER-Modell.
+
+
+* **`2025_..._create_customers_table.php`**: Füge Spalten wie `name`, `email`, `address` hinzu.
+* **`2025_..._create_employees_table.php`**: Füge `name`, `email` und `job_title` hinzu.
+* **`2025_..._create_appointments_table.php`**:
+    * `$table->foreignId('customer_id')->constrained()->onDelete('cascade');`
+    * `$table->foreignId('employee_id')->constrained()->onDelete('cascade');`
+    * `$table->string('status');`
+* **`2025_..._create_services_table.php`**:
+    * `$table->foreignId('appointment_id')->constrained()->onDelete('cascade');`
+    * `$table->decimal('price', 8, 2);`
+    * `$table->string('payment_status');`
+* **`2025_..._create_invoices_table.php`**:
+    * `$table->foreignId('customer_id')->constrained()->onDelete('cascade');`
+    * `$table->foreignId('employee_id')->constrained()->onDelete('cascade');`
+/**
+     * The attributes that should be cast.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'price' => 'float',
+    ];    * `$table->string('status');`
+    * `$table->decimal('total_amount', 8, 2);`
+* **`2025_..._create_invoice_service_table.php`**:
+    * `$table->foreignId('invoice_id')->constrained()->onDelete('cascade');`
+    * `$table->foreignId('service_id')->constrained()->onDelete('cascade');`
+
+Abschließend, führe die Migrationen aus: `sail artisan migrate`.
+
+---
+
+### 4. Definition der Eloquent-Beziehungen
+
+Öffne die Modelldateien in `app/Models` und definiere die Beziehungen.
+
+* **`Customer.php`**: `hasMany` Appointments und `hasMany` Invoices.
+* **`Employee.php`**: `hasMany` Appointments und `hasMany` Invoices.
+* **`Appointment.php`**: `belongsTo` Customer und `belongsTo` Employee; `hasMany` Services.
+* **`Service.php`**: `belongsTo` Appointment und `belongsToMany` Invoices.
+* **`Invoice.php`**: `belongsTo` Customer und `belongsTo` Employee; `belongsToMany` Services.
+
+---
+
+### 5. Erstellung von Factories und Seedern
+
+* Passe die generierten **Factories** an, um realistische Faker-Daten zu erzeugen.
+* Erstelle einen Haupt-Seeder mit `sail artisan make:seeder DatabaseSeeder`. In diesem Seeder rufst du die anderen Seeder auf, um die Datenbank mit Testdaten zu füllen.
+
+---
+
+### 6. Testbarkeit sicherstellen
+
+* **Unit-Tests**: Erstelle Tests im Verzeichnis `tests/Unit` für jedes Modell, um die Kernlogik und die Beziehungen zu validieren, ohne das HTTP-Layer zu nutzen. 
+    * Stelle sicher, dass das **Erstellen, Lesen, Aktualisieren und Löschen (CRUD)** von Datensätzen funktioniert.
+    * Teste, ob die Beziehungen die richtigen Modelle zurückgeben.
+* **Feature-Tests**: Erstelle Tests in `tests/Feature`, um die Interaktion zwischen den Modellen und den Controllern über HTTP zu überprüfen.
+
+
+

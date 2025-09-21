@@ -74,6 +74,18 @@ services:
             - '${FORWARD_MAILPIT_DASHBOARD_PORT:-8025}:8025'
         networks:
             - sail
+    selenium:
+        image: 'seleniarm/standalone-chromium'
+        volumes:
+            - '/dev/shm:/dev/shm'
+        ports:
+            - '${DUSK_PORT:-9515}:4444'
+        networks:
+            - sail
+
+
+
+
 networks:
     sail:
         driver: bridge

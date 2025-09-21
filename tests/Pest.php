@@ -1,5 +1,10 @@
 <?php
 
+uses(
+    Tests\DuskTestCase::class,
+    // Illuminate\Foundation\Testing\DatabaseMigrations::class,
+)->in('Browser');
+
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;

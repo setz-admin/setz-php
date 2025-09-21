@@ -10,21 +10,22 @@ vue_serve:
 	./vendor/bin/sail composer dev
 
 
-# Start the development php server
+# Start the development sail environment/php server
 serve:
 	./vendor/bin/sail up
 
 #
 # Testing
 #
+#  Model and Route Tests
 test:
-        
-	# execute test in docker container
-	#./vendor/bin/sail test --coverage --coverage-html=coverage
-	# execute test in on localhost
-	#php artisan test	
-	#./vendor/bin/pest --parallel --coverage --min=100 --coverage-html=coverage
 	./vendor/bin/sail test --coverage --min=100 --coverage-html=coverage
+
+browser_test:
+	./vendor/bin/sail php artisan dusk
+
+
+
 #
 # Quality Analysis
 #

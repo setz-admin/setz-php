@@ -1,0 +1,23 @@
+Generieren Sie Views , um 1. statische Websites des Unternehmens zu hosten und 2. das Datenmodell aus der Perspektive von:
+
+– Mitarbeitern
+– Kunden
+– Administratoren
+– nicht autorisierten Nutzern der Webseite zu bearbeiten bzw zu betrachten.
+
+Die Zentrale Blade  View sollte einen Kopf- und einen Fußbereich enthalten. Der Bereich zwischen Kopf- und Fußbereich wird als Mittelbereich bezeichnet und sollte in einen linken (20 %), center  und rechten (20 %) Bereich unterteilt sein. Linker, rechter und Fußbereich sollen per Mausklick minimiert werden können.
+Der Kopfbereich enthält:
+– Platz für das Firmenlogo rechts und links.
+– Den Firmennamen in der Mitte.
+– Schaltflächen zum Anmelden/Registrieren (Authentifizierung erfolgt mit Breeze).
+– Bei angemeldeten Nutzern soll Im Oberen Bereich des center eine Leiste eingeblendet werden.  In dieser Leiste sollen Drop Down Menüs eingefügt werden. Für jedes Model ein Drop Down Menü. Die Elemente eines Drop Down Menüs sollen die CRUD Operationen abbilden. Das anzeigen/eingeben von Daten für die jeweilige CRUD Operation soll im center Bereich erfolgen.
+
+
+Bei der Erzeugung von Entitäten in den verschiedenen views erzeugen sie stets einen eindeutigen Namen für die Entität  z.b. test_id="employee_submit_button", der dann in den Tests verwendet wird um jede Entität in Ihren Ausprägungen zu testen.
+Berücksichtigen Sie bei allen Schritten die Möglichkeiten den resultierenden Code einfach und testbar zu halten. 
+
+Geben Sie für alle Schritte die Begründungen für Ihr Design an. Seien Sie präzise und ausführlich.
+
+Erstellen Sie zunächst einen Plan.
+
+-----
