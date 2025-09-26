@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Tests\TestCase;
-
+use App\Models\User;
 use App\Models\Appointment;
 use App\Models\Customer;
 use App\Models\Employee;
@@ -20,6 +20,22 @@ use function Pest\Expectation;
 
 uses(TestCase::class, RefreshDatabase::class)->in('Feature');
 uses(RefreshDatabase::class)->in('Unit');
+
+
+// Automatisches Anmelden eines Benutzers für Tests,
+beforeEach(function () {
+        // Erstelle einen Benutzer und melde ihn an
+        $this->user = User::factory()->create();
+        $this->actingAs($this->user);
+});
+
+// Helper-Funktion, um Tests als Gast (nicht angemeldet) auszuführen
+function asGuest()
+{
+    return test()->withoutMiddleware(['auth']);
+}
+
+
 
 /**
  * Add checks for toBe assertion.

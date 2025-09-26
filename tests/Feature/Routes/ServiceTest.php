@@ -2,8 +2,11 @@
 
 use App\Models\Appointment;
 use App\Models\Service;
+use App\Models\User;
 
 it('can view a list of services', function () {
+    $user = User::factory()->create();
+    $this->actingAs($user);
     Service::factory()->count(3)->create();
 
     $this->get(route('services.index'))
@@ -12,6 +15,8 @@ it('can view a list of services', function () {
 });
 
 it('can create a service', function () {
+    $user = User::factory()->create();
+    $this->actingAs($user);
     $appointment = Appointment::factory()->create();
 
     $serviceData = [
@@ -30,6 +35,8 @@ it('can create a service', function () {
 });
 
 it('can update a service', function () {
+    $user = User::factory()->create();
+    $this->actingAs($user);
     $service = Service::factory()->create();
     $updatedData = [
         'appointment_id' => $service->appointment_id,
@@ -48,6 +55,8 @@ it('can update a service', function () {
 });
 
 it('can delete a service', function () {
+    $user = User::factory()->create();
+    $this->actingAs($user);
     $service = Service::factory()->create();
 
     $this->delete(route('services.destroy', $service))

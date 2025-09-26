@@ -1,18 +1,31 @@
 <?php
 
+namespace Tests\Feature\Routes;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
 use App\Models\Appointment;
 use App\Models\Customer;
 use App\Models\Employee;
+use Tests\TestCase;
+
+//uses(RefreshDatabase::class, TestCase::class)
+//    ->group('Appointments') // Optional: add a group for better organization
+//    ->in(__DIR__);
+
 
 it('can view a list of appointments', function () {
+    $user = User::factory()->create();
+    $this->actingAs($user);
     Appointment::factory()->count(2)->create();
-
     $this->get(route('appointments.index'))
         ->assertStatus(200)
         ->assertSee('Termine');
 });
 
 it('can create an appointment', function () {
+    $user = User::factory()->create();
+    $this->actingAs($user);
     $customer = Customer::factory()->create();
     $employee = Employee::factory()->create();
 
@@ -34,6 +47,8 @@ it('can create an appointment', function () {
 });
 
 it('can view a specific appointment', function () {
+    $user = User::factory()->create();
+    $this->actingAs($user);
     $appointment = Appointment::factory()->create();
 
     $this->get(route('appointments.show', $appointment))
@@ -43,6 +58,8 @@ it('can view a specific appointment', function () {
 });
 
 it('can update an appointment', function () {
+    $user = User::factory()->create();
+    $this->actingAs($user);
     $appointment = Appointment::factory()->create();
     $updatedData = [
         'customer_id' => $appointment->customer_id,
@@ -62,6 +79,8 @@ it('can update an appointment', function () {
 });
 
 it('can delete an appointment', function () {
+    $user = User::factory()->create();
+    $this->actingAs($user);
     $appointment = Appointment::factory()->create();
 
     $this->delete(route('appointments.destroy', $appointment))

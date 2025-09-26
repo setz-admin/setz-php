@@ -9,10 +9,19 @@ test-dev:
 vue_serve:
 	./vendor/bin/sail composer dev
 
+# erstellt den Test User mit der E-Mail test@example.com und dem Passwort password.
+test_user:
+	./vendor/bin/sail php artisan db:seed --class=UserSeeder
 
 # Start the development sail environment/php server
 serve:
 	./vendor/bin/sail up
+
+# delete Tables ; migrate ; add data with all Seeders .
+gen_data:
+	./vendor/bin/sail php artisan migrate:fresh --seed 
+
+
 
 #
 # Testing

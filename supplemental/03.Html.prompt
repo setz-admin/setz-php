@@ -21,3 +21,64 @@ Geben Sie für alle Schritte die Begründungen für Ihr Design an. Seien Sie pr�
 Erstellen Sie zunächst einen Plan.
 
 -----
+
+OK. Ich werde einen detaillierten Plan für die Erstellung der Views generieren, der alle Ihre Anforderungen berücksichtigt und eine modulare, testbare und wartbare Architektur vorsieht.
+
+### Plan
+
+#### 1. Grundlegendes Design und Begründung
+Die grundlegende Architektur wird auf **Blade Layouts**, **View Composers** und **Blade Components** basieren.
+* **Layouts**: Ich werde ein Hauptlayout (`resources/views/layouts/app.blade.php`) erstellen, das die grundlegende HTML-Struktur, den Kopf- und den Fußbereich definiert. Ein spezielles Layout (`resources/views/layouts/crud.blade.php`) wird dieses Hauptlayout erweitern und die dreiteilige Spaltenstruktur für den Mittelbereich (`left`, `center`, `right`) bereitstellen. Dies vermeidet Code-Duplizierung und sorgt für ein konsistentes Erscheinungsbild.
+* **View Composers**: Ich werde einen `NavigationComposer` verwenden, um die Navigation dynamisch zu erstellen. Anstatt die Dropdown-Menüs hart zu codieren, wird der Composer die Modelle prüfen, für die ein Nutzer die Berechtigung hat, und die Menüs dynamisch generieren. Dies hält die Views sauber und die Logik in einer separaten Klasse.
+* **Blade Components**: Wiederverwendbare UI-Elemente wie der Header, Footer, die Seitenleisten und Formularelemente werden als Blade-Komponenten erstellt. Dies verbessert die Wiederverwendbarkeit und Lesbarkeit des Codes. Jede Komponente kann unabhängig getestet werden.
+
+#### 2. Schritt-für-Schritt-Implementierung
+
+1.  **Erstellung des Haupt-Layouts (`layouts/app.blade.php`)**
+    * Definieren der HTML-Basis mit Platzhaltern (Slots) für den Kopf- (`header`), den Hauptinhaltsbereich (`content`) und den Fußbereich (`footer`).
+    * Einbinden von Tailwind CSS und einem JavaScript-File für die Client-seitige Funktionalität.
+    * Der Header und der Footer werden als Blade-Komponenten (`<x-header />` und `<x-footer />`) eingebunden.
+    * Begründung: Das Trennen des Layouts vom Inhalt macht das Design modular. Das Einbinden von Komponenten erhöht die Wiederverwendbarkeit.
+
+2.  **Erstellung des CRUD-Layouts (`layouts/crud.blade.php`)**
+    * Dieses Layout wird `layouts/app.blade.php` erweitern (`@extends('layouts.app')`).
+    * Es wird den `content`-Slot in drei Spalten aufteilen: `left`, `center` und `right`.
+    * Jede Spalte wird einen eigenen Slot haben (`sidebar-left`, `main-content`, `sidebar-right`).
+    * Die Logik zum Minimieren der Seitenleisten wird über JavaScript implementiert, das per data-Attribut (`data-toggle="sidebar-left"`) auf die Buttons verweist.
+    * Begründung: Dieses Layout ist speziell für die Datenmodellansichten konzipiert. Die Dreiteilung wird zentral definiert, sodass alle CRUD-Seiten das gleiche Layout haben, ohne dass der Code dupliziert werden muss.
+
+3.  **Entwicklung der Blade-Komponenten**
+    * **Header (`resources/views/components/header.blade.php`)**:
+        * Enthält das Firmenlogo, den Namen und die Authentifizierungs-Buttons (`Login`/`Register`).
+        * Nutzt `@auth` zur Unterscheidung zwischen angemeldeten und nicht angemeldeten Nutzern.
+        * Dynamische Navigation: Die Dropdown-Menüs für die CRUD-Operationen werden hier als separate Komponente (`<x-crud-nav />`) eingebunden, die von einem View Composer mit Daten gefüllt wird.
+    * **Footer (`resources/views/components/footer.blade.php`)**:
+        * Einfaches statisches HTML.
+    * **CRUD-Navigation (`resources/views/components/crud-nav.blade.php`)**:
+        * Eine Schleife, die die vom View Composer bereitgestellten Model-Links rendert.
+        * Jeder Link wird die `test-id` erhalten, z.B. `test-id="link-employees"`.
+    * Begründung: Die Verwendung von Komponenten fördert das DRY-Prinzip (Don't Repeat Yourself) und macht die Oberfläche konsistent. Die `test-id` Attribut-Strategie wird von Dusk zur Identifizierung von Elementen verwendet, was die Tests robuster gegenüber UI-Änderungen macht.
+
+4.  **Implementierung der Views für das Datenmodell**
+    * Für jede CRUD-Operation eines jeden Modells wird eine eigene Blade-View erstellt (`employee/index.blade.php`, `customer/create.blade.php`, usw.).
+    * Jede dieser Views wird das `layouts/crud.blade.php` Layout verwenden.
+    * Im `center` Bereich wird der spezifische Inhalt angezeigt (z.B. eine Tabelle mit Mitarbeitern, ein Formular zum Erstellen eines neuen Kunden).
+    * Jedes Formularelement und jeder Button erhält eine eindeutige `test-id`, z.B. `test-id="employee-form"` oder `test-id="employee-submit-button"`, um sie in den Dusk-Tests gezielt ansprechen zu können.
+    * Begründung: Die Trennung von `index`, `create`, `show` und `edit` Views pro Modell hält die Dateien klein und die Logik klar. Die `test-id`s sind entscheidend für zuverlässige und wartbare Dusk-Tests.
+
+5.  **Anpassung der Controller und Routen**
+    * Die Controller müssen die entsprechenden Views zurückgeben und die benötigten Daten übergeben (`return view('employees.index', compact('employees'))`).
+    * Die Authentifizierung und Autorisierung werden über Laravel Middleware (`auth`) und Policies (`can`) gehandhabt.
+    * Begründung: Die Controller sind für die Logik zuständig, nicht für die Darstellung. Das `Policy`-System von Laravel ist der sicherste und effizienteste Weg, um Zugriffsrechte für verschiedene Benutzerrollen (Mitarbeiter, Kunden, Admins) zu verwalten.
+
+6.  **Erstellung der statischen Views**
+    * Für die statischen Seiten (`welcome.blade.php`) wird das `layouts/app.blade.php` Layout direkt verwendet.
+    * Da diese Seiten keine Seitenleisten benötigen, wird nur der `content`-Slot gefüllt.
+    * Begründung: Dies zeigt die Flexibilität des Layout-Systems, das sowohl für komplexe als auch für einfache Seiten verwendet werden kann, ohne die Struktur zu stören.
+
+---
+
+
+
+
+

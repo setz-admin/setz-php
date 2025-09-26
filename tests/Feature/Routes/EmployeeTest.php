@@ -1,8 +1,11 @@
 <?php
 
 use App\Models\Employee;
+use App\Models\User;
 
 it('can view a list of employees', function () {
+    $user = User::factory()->create();
+    $this->actingAs($user);
     Employee::factory()->count(2)->create();
 
     $this->get(route('employees.index'))
@@ -11,6 +14,8 @@ it('can view a list of employees', function () {
 });
 
 it('can create an employee', function () {
+    $user = User::factory()->create();
+    $this->actingAs($user);
     $employeeData = Employee::factory()->make()->toArray();
 
     $this->post(route('employees.store'), $employeeData)
@@ -22,6 +27,8 @@ it('can create an employee', function () {
 });
 
 it('can view a specific employee', function () {
+    $user = User::factory()->create();
+    $this->actingAs($user);
     $employee = Employee::factory()->create();
 
     $this->get(route('employees.show', $employee))
@@ -30,6 +37,8 @@ it('can view a specific employee', function () {
 });
 
 it('can update an employee', function () {
+    $user = User::factory()->create();
+    $this->actingAs($user);
     $employee = Employee::factory()->create();
     $updatedData = [
         'name' => 'Neuer Mitarbeitername',
@@ -46,6 +55,8 @@ it('can update an employee', function () {
 });
 
 it('can delete an employee', function () {
+    $user = User::factory()->create();
+    $this->actingAs($user);
     $employee = Employee::factory()->create();
 
     $this->delete(route('employees.destroy', $employee))

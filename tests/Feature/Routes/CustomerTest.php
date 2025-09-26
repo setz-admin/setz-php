@@ -8,19 +8,25 @@ use App\Models\User;
 // User::factory()->create();
 
 it('can view a list of customers', function () {
+    $user = User::factory()->create();
+    $this->actingAs($user);
     Customer::factory()->count(3)->create();
 
     $this->get(route('customers.index'))
         ->assertStatus(200)
-        ->assertSee('Kundenliste'); // Ersetzen Sie dies mit dem tatsächlichen Text auf der Seite
+        ->assertSee('Neuen Kunden erstellen'); // Ersetzen Sie dies mit dem tatsächlichen Text auf der Seite
 });
 
 it('can view the create customer page', function () {
+    $user = User::factory()->create();
+    $this->actingAs($user);
     $this->get(route('customers.create'))
         ->assertStatus(200);
 });
 
 it('can create a customer', function () {
+    $user = User::factory()->create();
+    $this->actingAs($user);
     $customerData = Customer::factory()->make()->toArray();
 
     $this->post(route('customers.store'), $customerData)
@@ -32,6 +38,8 @@ it('can create a customer', function () {
 });
 
 it('can view a specific customer', function () {
+    $user = User::factory()->create();
+    $this->actingAs($user);
     $customer = Customer::factory()->create();
 
     $this->get(route('customers.show', $customer))
@@ -40,6 +48,8 @@ it('can view a specific customer', function () {
 });
 
 it('can update a customer', function () {
+    $user = User::factory()->create();
+    $this->actingAs($user);
     $customer = Customer::factory()->create();
     $updatedData = [
         'name' => 'Neuer Name',
@@ -56,6 +66,8 @@ it('can update a customer', function () {
 });
 
 it('can delete a customer', function () {
+    $user = User::factory()->create();
+    $this->actingAs($user);
     $customer = Customer::factory()->create();
 
     $this->delete(route('customers.destroy', $customer))

@@ -1,11 +1,14 @@
 <?php
 
+use App\Models\User;
 use App\Models\Customer;
 use App\Models\Employee;
 use App\Models\Invoice;
 use App\Models\Service;
 
 it('can view a list of invoices', function () {
+    $user = User::factory()->create();
+    $this->actingAs($user);
     Invoice::factory()->count(2)->create();
 
     $this->get(route('invoices.index'))
@@ -14,6 +17,8 @@ it('can view a list of invoices', function () {
 });
 
 it('can create an invoice', function () {
+    $user = User::factory()->create();
+    $this->actingAs($user);
     $customer = Customer::factory()->create();
     $employee = Employee::factory()->create();
     $services = Service::factory()->count(2)->create();
@@ -45,6 +50,8 @@ it('can create an invoice', function () {
 });
 
 it('can update an invoice', function () {
+    $user = User::factory()->create();
+    $this->actingAs($user);
     $invoice = Invoice::factory()->create();
     $updatedData = [
         'customer_id' => $invoice->customer_id, // Add this line
@@ -65,6 +72,8 @@ it('can update an invoice', function () {
 });
 
 it('can delete an invoice', function () {
+    $user = User::factory()->create();
+    $this->actingAs($user);
     $invoice = Invoice::factory()->create();
 
     $this->delete(route('invoices.destroy', $invoice))
