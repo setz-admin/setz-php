@@ -20,15 +20,12 @@ Route::middleware(['auth'])->group(function () {
     })->middleware('verified')->name('dashboard');
 
     // All resource routes for the models are now protected.
-    Route::resource('customers', \App\Http\Controllers\CustomerController::class);
-    Route::resource('employees', \App\Http\Controllers\EmployeeController::class);
-    Route::resource('appointments', \App\Http\Controllers\AppointmentController::class);
-    Route::resource('services', \App\Http\Controllers\ServiceController::class);
-    Route::resource('invoices', \App\Http\Controllers\InvoiceController::class);
+    Route::resource('customers', CustomerController::class);
+    Route::resource('employees', EmployeeController::class);
+    Route::resource('appointments', AppointmentController::class);
+    Route::resource('services', ServiceController::class);
+    Route::resource('invoices', InvoiceController::class);
 });
-
-
-
 
 // These routes, from Laravel Breeze, are also protected.
 Route::middleware('auth')->group(function () {

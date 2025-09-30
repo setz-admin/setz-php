@@ -1,118 +1,47 @@
 <?php
 
-uses(
-    Tests\DuskTestCase::class,
-    // Illuminate\Foundation\Testing\DatabaseMigrations::class,
-)->in('Browser');
+/*
+|--------------------------------------------------------------------------
+| Test Case
+|--------------------------------------------------------------------------
+|
+| The closure you provide to your test functions is always bound to a specific PHPUnit test
+| case class. By default, that class is "PHPUnit\Framework\TestCase". Of course, you may
+| need to change it using the "pest()" function to bind a different classes or traits.
+|
+*/
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Carbon;
-use Tests\TestCase;
-use App\Models\User;
-use App\Models\Appointment;
-use App\Models\Customer;
-use App\Models\Employee;
-
-use App\Models\Service;
-use function Pest\Expectation;
-
-
-uses(TestCase::class, RefreshDatabase::class)->in('Feature');
-uses(RefreshDatabase::class)->in('Unit');
-
-
-// Automatisches Anmelden eines Benutzers für Tests,
-beforeEach(function () {
-        // Erstelle einen Benutzer und melde ihn an
-        $this->user = User::factory()->create();
-        $this->actingAs($this->user);
-});
-
-// Helper-Funktion, um Tests als Gast (nicht angemeldet) auszuführen
-function asGuest()
-{
-    return test()->withoutMiddleware(['auth']);
-}
-
-
-
-/**
- * Add checks for toBe assertion.
- */
-expect()->pipe('toBe', function (Closure $next, mixed $expected) {
-
-    // compare against a carbon object
-    if ($this->value instanceof Carbon) {
-        return expect($this->value->toDateTimeString())
-            ->toBe(Carbon::parse($expected)->toDateTimeString());
-    }
-
-    // compare against a model
-    if ($this->value instanceof Model) {
-        return expect($this->value->is($expected))
-            ->toBe(true);
-    }
-
-    return $next();
-});
-
-/**
- * Check for a list of array attributes.
- */
-expect()->extend('toHaveAttributes', function (array $attributes) {
-    foreach ($attributes as $key => $value) {
-        expect($this->value->$key)
-            ->toBe($value)
-            ->not->toBeNull($key);
-    }
-});
-
-/**
- * Erstellt einen Kunden, Mitarbeiter und Termin.
- * Begründung: Anstatt in jedem Test, der einen Termin mit Beziehungen
- * benötigt, denselben Boilerplate-Code zu schreiben, rufen Sie einfach
- * die Funktion createAppointmentWithRelations() auf. Dies reduziert
- * Redundanz und macht die Tests leichter lesbar.
- */
-function createAppointmentWithRelations(): Appointment
-{
-    $customer = Customer::factory()->create();
-    $employee = Employee::factory()->create();
-
-    return Appointment::factory()->for($customer)->for($employee)->create();
-}
-
+pest()->extend(Tests\TestCase::class)
+    ->use(Illuminate\Foundation\Testing\RefreshDatabase::class)
+    ->in('Feature');
 
 /*
-* Begründung: Diese benutzerdefinierten Assertions machen Tests
-*  extrem ausdrucksstark und selbstdokumentierend. Anstelle von
-* expect($service->payment_status)->toBe('paid'), können Sie
-* expect($service)->toHavePaymentStatusPaid() schreiben. Dies
-* verbessert die Lesbarkeit erheblich und fasst die Geschäftslogik
-* in den Tests zusammen.
+|--------------------------------------------------------------------------
+| Expectations
+|--------------------------------------------------------------------------
+|
+| When you're writing tests, you often need to check that values meet certain conditions. The
+| "expect()" function gives you access to a set of "expectations" methods that you can use
+| to assert different things. Of course, you may extend the Expectation API at any time.
+|
 */
-/**
- * Überprüft, ob der Zahlungsstatus der Dienstleistung "offen" ist.
- */
-expect()->extend('toHavePaymentStatusOpen', function () {
-    /** @var Expectation $this */
-    return $this->toHaveKey('payment_status', 'open');
+
+expect()->extend('toBeOne', function () {
+    return $this->toBe(1);
 });
 
-/**
- * Überprüft, ob eine Liste von Dienstleistungen vollständig bezahlt ist.
- */
-expect()->extend('allBePaid', function () {
-    foreach ($this->value as $service) {
-        expect($service)->toHavePaymentStatusPaid();
-    }
-});
+/*
+|--------------------------------------------------------------------------
+| Functions
+|--------------------------------------------------------------------------
+|
+| While Pest is very powerful out-of-the-box, you may have some testing code specific to your
+| project that you don't want to repeat in every file. Here you can also expose helpers as
+| global functions to help you to reduce the number of lines of code in your test files.
+|
+*/
 
-/**
- * Überprüft, ob der Zahlungsstatus "bezahlt" ist.
- */
-expect()->extend('toHavePaymentStatusPaid', function () {
-    /** @var Expectation $this */
-    return $this->toHaveKey('payment_status', 'paid');
-});
+function something()
+{
+    // ..
+}
