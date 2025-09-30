@@ -37,7 +37,16 @@ cd ~/workspace
 php artisan serve --host=0.0.0.0 --port=8000
 ```
 
-The project will be available via Coder's port forwarding.
+**Accessing the Application:**
+
+1. **From Coder Web-UI:** Navigate to your workspace → Click on "Ports" → Click Port 8000
+2. **From VS Code Desktop:**
+   - Open the "Ports" panel (bottom of VS Code, next to Terminal)
+   - Click the globe icon (🌐) next to Port 8000, or
+   - Right-click Port 8000 → "Open in Browser"
+3. **Direct URL:** `https://<your-coder-url>/@<username>/<workspace>/port/8000`
+
+The application will be accessible via Coder's automatic port forwarding.
 
 ## Development Workflows
 
