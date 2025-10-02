@@ -7,9 +7,15 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\ServiceController;
+use App\Http\Controllers\PageController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () { return view('welcome'); });
+// Public pages
+Route::get('/', [PageController::class, 'home'])->name('home');
+Route::get('/about', [PageController::class, 'about'])->name('about');
+Route::get('/contact', [PageController::class, 'contact'])->name('contact');
+Route::get('/impressum', [PageController::class, 'impressum'])->name('impressum');
+Route::get('/datenschutz', [PageController::class, 'datenschutz'])->name('datenschutz');
 
 // This route group is for authenticated users.
 // It uses the `auth` middleware to protect all routes within it.
