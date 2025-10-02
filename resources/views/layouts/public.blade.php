@@ -184,7 +184,10 @@
             <!-- Footer -->
             <footer class="mt-16 pt-8 border-t border-gray-400 max-w-4xl mx-auto">
                 <div class="flex justify-between items-center text-sm text-gray-600">
-                    <p>&copy; {{ date('Y') }} EDV Integration Dr. Setz</p>
+                    <div>
+                        <p>&copy; {{ date('Y') }} EDV Integration Dr. Setz</p>
+                        <p class="text-xs mt-1">Version: {{ trim(file_get_contents(base_path('VERSION.txt'))) }}</p>
+                    </div>
                     <div class="space-x-4">
                         <a href="{{ route('impressum') }}" class="hover:text-gray-900">Impressum</a>
                         <a href="{{ route('datenschutz') }}" class="hover:text-gray-900">Datenschutz</a>
