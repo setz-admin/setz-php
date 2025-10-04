@@ -103,6 +103,7 @@ RUN apk add --no-cache --virtual .build-deps \
         postgresql-libs \
         icu-libs \
         fcgi \
+        nginx \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) \
         pdo_mysql \
