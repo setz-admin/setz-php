@@ -86,15 +86,23 @@ LABEL org.opencontainers.image.source="https://github.com/thsetz/setz-php"
 
 WORKDIR /var/www/html
 
-# Install runtime dependencies only
-RUN apk add --no-cache \
-    libpng \
-    libjpeg-turbo \
-    freetype \
-    libzip \
-    postgresql-libs \
-    icu-libs \
-    fcgi \
+# Install build dependencies, runtime dependencies, and PHP extensions
+RUN apk add --no-cache --virtual .build-deps \
+        libpng-dev \
+        libjpeg-turbo-dev \
+        freetype-dev \
+        libzip-dev \
+        oniguruma-dev \
+        postgresql-dev \
+        icu-dev \
+    && apk add --no-cache \
+        libpng \
+        libjpeg-turbo \
+        freetype \
+        libzip \
+        postgresql-libs \
+        icu-libs \
+        fcgi \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) \
         pdo_mysql \
@@ -106,7 +114,8 @@ RUN apk add --no-cache \
         gd \
         zip \
         intl \
-        opcache
+        opcache \
+    && apk del .build-deps
 
 # Copy PHP configuration
 COPY docker/php/php.ini /usr/local/etc/php/conf.d/app.ini
