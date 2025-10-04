@@ -11,8 +11,8 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install npm dependencies
-RUN npm ci --only=production
+# Install npm dependencies (including dev dependencies for build)
+RUN npm ci
 
 # Copy source files needed for build
 COPY resources ./resources
