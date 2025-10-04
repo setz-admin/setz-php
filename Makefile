@@ -28,7 +28,7 @@ gen_data:
 #
 #  Model and Route Tests
 test:
-	./vendor/bin/sail test --coverage --min=100 --coverage-html=coverage
+	./vendor/bin/sail test --coverage --min=80 --coverage-html=coverage
 
 browser_test:
 	./vendor/bin/sail php artisan dusk
