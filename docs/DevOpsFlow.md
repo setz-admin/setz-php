@@ -28,8 +28,8 @@ graph TD
     S -->|Ja| T[Release erstellen minor/major/patch]
     T --> U[Tag erstellen v0.X.0]
     U --> V[CHANGELOG generieren]
-    V --> W[Tarball erstellen]
-    W --> X[Upload Download-Server]
+    V --> W[Docker Image erstellen]
+    W --> X[Push zu Container Registry]
     X --> Y[Production Deployment]
     Y --> Z[Health-Check]
     Z --> AA{Health OK?}
@@ -359,28 +359,45 @@ on:
 
 jobs:
   build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Install dependencies
-        run: composer install --no-dev --optimize-autoloader
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-      - name: Build assets
-        run: npm install && npm run build
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Create tarball
-        run: |
-          VERSION=$(cat VERSION.txt)
-          tar -czf setz-php_${VERSION}.tar.gz \
-            --exclude='.git' \
-            --exclude='node_modules' \
-            --exclude='tests' \
-            .
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=raw,value=latest
 
-      - name: Upload to download server
-        run: |
-          scp setz-php_${VERSION}.tar.gz deploy@download.setz.de:/var/www/releases/
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 ```
 
 **Manuelle Alternative:**
@@ -391,31 +408,36 @@ VERSION=$(cat VERSION.txt)
 # Sauberes Checkout des Release-Tags
 git checkout v${VERSION}
 
-# Dependencies für Production
-composer install --no-dev --optimize-autoloader
-npm ci && npm run build
+# GitHub Personal Access Token für Login (classic token mit write:packages Scope)
+echo $GITHUB_TOKEN | docker login ghcr.io -u USERNAME --password-stdin
 
-# Tarball erstellen
-tar -czf setz-php_${VERSION}.tar.gz \
-  --exclude='.git' \
-  --exclude='node_modules' \
-  --exclude='tests' \
-  --exclude='.env' \
-  .
+# Docker Image bauen mit GitHub Container Registry
+REPO_OWNER=$(git remote get-url origin | sed 's/.*github.com[:/]\(.*\)\/.*/\1/')
+REPO_NAME=$(git remote get-url origin | sed 's/.*\/\(.*\)\.git/\1/')
+IMAGE_NAME="ghcr.io/${REPO_OWNER}/${REPO_NAME}"
 
-# Upload zum Download-Server
-scp setz-php_${VERSION}.tar.gz deploy@download.setz.de:/var/www/releases/
+docker build -t ${IMAGE_NAME}:${VERSION} \
+             -t ${IMAGE_NAME}:latest \
+             --build-arg BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ") \
+             --build-arg VERSION=${VERSION} \
+             .
 
-# SHA-256 Checksum erstellen
-sha256sum setz-php_${VERSION}.tar.gz > setz-php_${VERSION}.tar.gz.sha256
-scp setz-php_${VERSION}.tar.gz.sha256 deploy@download.setz.de:/var/www/releases/
+# Docker Image pushen
+docker push ${IMAGE_NAME}:${VERSION}
+docker push ${IMAGE_NAME}:latest
+
+# Image Digest anzeigen für Verifikation
+docker inspect --format='{{index .RepoDigests 0}}' ${IMAGE_NAME}:${VERSION}
 ```
 
 **Begründung:**
-- Production-Build ohne Dev-Dependencies reduziert Größe und Sicherheitsrisiken
-- Tarball ermöglicht einfache Distribution
-- Checksum verifiziert Integrität des Downloads
-- Versioniertes Artefakt ist reproduzierbar
+- Docker Image kapselt komplette Laufzeitumgebung (PHP, Extensions, Konfiguration)
+- GitHub Container Registry (ghcr.io) ist kostenlos für öffentliche Repositories
+- Immutable Artefakte garantieren identisches Verhalten zwischen Stages
+- GitHub Actions Cache (gha) beschleunigt Builds erheblich
+- Image-Digest ermöglicht kryptographische Verifikation
+- Automatische Semantic Version Tags (v1.2.3, v1.2, v1, latest)
+- GITHUB_TOKEN wird automatisch bereitgestellt, keine zusätzlichen Secrets nötig
 
 ---
 
@@ -423,50 +445,62 @@ scp setz-php_${VERSION}.tar.gz.sha256 deploy@download.setz.de:/var/www/releases/
 
 **Staging-Deployment (nach Merge):**
 ```bash
-# Automatisch via CI auf Staging-Server
+# Automatisch via CI auf Staging-Server mit Docker Compose
 ssh deploy@staging.setz.de << 'EOF'
   cd /var/www/setz-php
-  git pull origin main
-  composer install
-  php artisan migrate
-  php artisan config:cache
-  php artisan route:cache
-  php artisan view:cache
+
+  # Pull latest image
+  docker compose pull app
+
+  # Recreate container with new image
+  docker compose up -d app
+
+  # Run migrations
+  docker compose exec app php artisan migrate
+
+  # Clear and cache
+  docker compose exec app php artisan config:cache
+  docker compose exec app php artisan route:cache
+  docker compose exec app php artisan view:cache
 EOF
 ```
 
 **Production-Deployment (nach Release):**
 ```bash
-# Download Release-Artefakt
+# Version festlegen
 VERSION=$(cat VERSION.txt)
-wget https://download.setz.de/releases/setz-php_${VERSION}.tar.gz
-wget https://download.setz.de/releases/setz-php_${VERSION}.tar.gz.sha256
+IMAGE_NAME="ghcr.io/thsetz/setz-php:${VERSION}"
 
-# Checksum verifizieren
-sha256sum -c setz-php_${VERSION}.tar.gz.sha256
+# Image Digest für Verifikation abrufen
+docker manifest inspect ${IMAGE_NAME} --verbose
 
-# Deployment
+# Deployment via Docker Compose auf Production
 ssh deploy@setz.de << EOF
-  cd /var/www
-  tar -xzf setz-php_${VERSION}.tar.gz -C setz-php-new
+  cd /var/www/setz-php
 
-  # Backup current version
-  mv setz-php setz-php-backup-$(date +%Y%m%d-%H%M%S)
+  # Backup: Current container als Image speichern
+  docker commit setz-php-app setz-php-backup:$(date +%Y%m%d-%H%M%S)
 
-  # Switch to new version
-  mv setz-php-new setz-php
+  # Update docker-compose.yml mit neuer Version
+  sed -i 's|image: ghcr.io/thsetz/setz-php:.*|image: ${IMAGE_NAME}|' docker-compose.yml
 
-  # Configuration & Migrations
-  cd setz-php
-  cp ../setz-php-backup-*/​.env .env
-  php artisan migrate --force
-  php artisan config:cache
-  php artisan route:cache
-  php artisan view:cache
+  # Pull neues Image
+  docker compose pull app
 
-  # Restart services
-  sudo systemctl restart php-fpm
-  sudo systemctl reload nginx
+  # Blue-Green Deployment: Neuen Container starten
+  docker compose up -d app
+
+  # Warten bis Container healthy ist
+  timeout 30 sh -c 'until docker compose ps app | grep -q "healthy"; do sleep 1; done'
+
+  # Migrations ausführen
+  docker compose exec app php artisan migrate --force
+
+  # Cache optimieren
+  docker compose exec app php artisan config:cache
+  docker compose exec app php artisan route:cache
+  docker compose exec app php artisan view:cache
+  docker compose exec app php artisan optimize
 EOF
 
 # Health-Check
@@ -474,9 +508,12 @@ curl -f https://www.setz.de || echo "⚠️ Health-check failed!"
 ```
 
 **Begründung:**
-- Staging ermöglicht finalen Test vor Production
-- Atomic-Deployment mit Backup ermöglicht schnellen Rollback
-- Health-Check verifiziert erfolgreichen Deployment
+- Docker Container ermöglicht konsistente Umgebung über alle Stages
+- Image-basiertes Deployment ist atomic und deterministisch
+- Container-Backups ermöglichen schnellen Rollback
+- Health-Checks in Docker Compose stellen sicher, dass Container bereit ist
+- Blue-Green Deployment minimiert Downtime
+- Keine manuelle Dependency-Installation nötig (alles im Image)
 
 ---
 
@@ -484,38 +521,66 @@ curl -f https://www.setz.de || echo "⚠️ Health-check failed!"
 
 **Bei Fehler in Production:**
 
-**Option 1: Schneller Rollback (Backup wiederherstellen)**
+**Option 1: Schneller Rollback (Container-Backup wiederherstellen)**
 ```bash
 ssh deploy@setz.de << 'EOF'
-  cd /var/www
+  cd /var/www/setz-php
 
-  # Aktuellen Zustand sichern
-  mv setz-php setz-php-failed-$(date +%Y%m%d-%H%M%S)
+  # Letztes Backup-Image identifizieren
+  LAST_BACKUP=$(docker images setz-php-backup --format "{{.Tag}}" | sort -r | head -1)
 
-  # Letztes Backup wiederherstellen
-  LAST_BACKUP=$(ls -t setz-php-backup-* | head -1)
-  cp -r $LAST_BACKUP setz-php
+  # Container stoppen
+  docker compose down app
 
-  # Services neustarten
-  sudo systemctl restart php-fpm
-  sudo systemctl reload nginx
+  # Backup-Image als neues Image taggen
+  docker tag setz-php-backup:${LAST_BACKUP} ghcr.io/thsetz/setz-php:rollback
+
+  # docker-compose.yml temporär auf Rollback-Image setzen
+  sed -i.bak 's|image: ghcr.io/thsetz/setz-php:.*|image: ghcr.io/thsetz/setz-php:rollback|' docker-compose.yml
+
+  # Container mit Backup-Image starten
+  docker compose up -d app
+
+  # Warten bis healthy
+  timeout 30 sh -c 'until docker compose ps app | grep -q "healthy"; do sleep 1; done'
 EOF
 ```
 
-**Option 2: Git-basierter Rollback**
+**Option 2: Image-basierter Rollback (vorherige Version)**
 ```bash
 # Vorherigen Release-Tag identifizieren
-git tag --sort=-version:refname | head -2
+PREVIOUS_VERSION=$(git tag --sort=-version:refname | sed -n '2p' | sed 's/^v//')
 
-# Auf vorherigen Tag zurücksetzen
-git checkout v0.1.0
+ssh deploy@setz.de << EOF
+  cd /var/www/setz-php
 
-# Erneut deployen (siehe Production-Deployment)
+  # Auf vorheriges Image zurücksetzen
+  sed -i 's|image: ghcr.io/thsetz/setz-php:.*|image: ghcr.io/thsetz/setz-php:${PREVIOUS_VERSION}|' docker-compose.yml
+
+  # Pull vorheriges Image
+  docker compose pull app
+
+  # Recreate container
+  docker compose up -d app
+
+  # Warten bis healthy
+  timeout 30 sh -c 'until docker compose ps app | grep -q "healthy"; do sleep 1; done'
+EOF
+```
+
+**Option 3: Container-Restart (bei transienten Fehlern)**
+```bash
+ssh deploy@setz.de << 'EOF'
+  cd /var/www/setz-php
+  docker compose restart app
+EOF
 ```
 
 **Begründung:**
-- Backup-Strategie ermöglicht Rollback in < 2 Minuten
-- Git-Tags ermöglichen präzise Wiederherstellung jeder Version
+- Container-Backups ermöglichen Rollback in < 1 Minute (kein Re-Build nötig)
+- Image-Tags sind immutable und deterministisch
+- Docker Health-Checks garantieren funktionsfähigen Container vor Traffic-Umleitung
+- Keine Filesystem-Backups nötig (State in Datenbank/Volumes)
 
 ---
 
@@ -529,11 +594,14 @@ git checkout v0.1.0
 
 **Log-Monitoring:**
 ```bash
-# Laravel Logs
-ssh deploy@setz.de "tail -f /var/www/setz-php/storage/logs/laravel.log"
+# Laravel Logs aus Container
+ssh deploy@setz.de "docker compose -f /var/www/setz-php/docker-compose.yml logs -f app"
 
-# Nginx Error Logs
-ssh deploy@setz.de "tail -f /var/log/nginx/error.log"
+# Nur Fehler anzeigen
+ssh deploy@setz.de "docker compose -f /var/www/setz-php/docker-compose.yml logs -f app | grep ERROR"
+
+# Container-Logs exportieren
+ssh deploy@setz.de "docker compose -f /var/www/setz-php/docker-compose.yml logs --since 1h app" > logs.txt
 ```
 
 ---
@@ -565,11 +633,11 @@ ssh deploy@setz.de "tail -f /var/log/nginx/error.log"
 9. Release erstellen (Maintainer)
    └─> ./supplemental/make_release.sh minor
 
-10. Artefakt-Distribution (automatisch via CI)
-    └─> setz-php_X.Y.Z.tar.gz auf Download-Server
+10. Docker Image Build & Push (automatisch via CI)
+    └─> ghcr.io/thsetz/setz-php:X.Y.Z nach GitHub Container Registry
 
 11. Production-Deployment (manuell/automatisiert)
-    └─> Download → Verify → Deploy → Health-Check
+    └─> Pull Image → Update Container → Migrate → Health-Check
 ```
 
 ---
