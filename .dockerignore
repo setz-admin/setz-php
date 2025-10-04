@@ -1,0 +1,68 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Dependencies (will be installed in build)
+/node_modules
+/vendor
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Tests
+/tests
+/coverage
+/.phpunit.cache
+phpunit.xml
+pest.php
+
+# Documentation
+*.md
+!README.md
+/docs
+
+# CI/CD
+.github
+.gitlab-ci.yml
+
+# Build artifacts
+/public/hot
+/public/storage
+/storage/*.key
+
+# Logs (will be created at runtime)
+/storage/logs/*
+!/storage/logs/.gitkeep
+
+# Cache (will be created at runtime)
+/bootstrap/cache/*
+!/bootstrap/cache/.gitignore
+/storage/framework/cache/*
+!/storage/framework/cache/.gitignore
+/storage/framework/sessions/*
+!/storage/framework/sessions/.gitignore
+/storage/framework/views/*
+!/storage/framework/views/.gitignore
+
+# Development tools
+/supplemental
+Makefile
+
+# Docker
+docker-compose*.yml
+Dockerfile
+.dockerignore
