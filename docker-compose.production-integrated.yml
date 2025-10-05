@@ -41,7 +41,7 @@ services:
       - caddy
 
   setz_php_app:
-    image: ghcr.io/thsetz/setz-php:latest
+    image: ghcr.io/thsetz/setz-php:${SETZ_PHP_VERSION:latest}
     restart: unless-stopped
     container_name: setz_php_app
     environment:
@@ -63,8 +63,10 @@ services:
       start_period: 40s
       retries: 3
 
+
+# Serviere statische Dateien mit Nginx
   setz_php_nginx:
-    image: ghcr.io/thsetz/setz-php:latest
+    image: ghcr.io/thsetz/setz-php:${SETZ_PHP_VERSION:latest}
     restart: unless-stopped
     container_name: setz_php_nginx
     user: root
