@@ -11,22 +11,9 @@
                 <h2 class="text-2xl font-semibold text-gray-900 mb-3">Unternehmen</h2>
                 <p>
                     EDV Integration Dr. Setz wurde 1997 als Einzelunternehmen in Idar-Oberstein gegründet.
-                    Das Unternehmen entstand aus der Forschungsarbeit von Dr. Setz über verteilte Systeme.
                 </p>
             </section>
 
-            <section>
-                <h2 class="text-2xl font-semibold text-gray-900 mb-3">Geschichte</h2>
-                <p>
-                    Unsere Wurzeln liegen in der akademischen Forschung an renommierten Universitäten
-                    (Saarbrücken, Yale, TU Darmstadt). Aus dieser Zeit entstanden erste Beratungsanfragen
-                    von Unternehmen. Zunächst wurden Projekte parallel zur Forschungstätigkeit durchgeführt.
-                </p>
-                <p>
-                    Seit 1999 konzentrieren wir uns vollständig auf Kundenprojekte und haben ein Netzwerk
-                    von freiberuflichen Fachexperten aufgebaut.
-                </p>
-            </section>
 
             <section>
                 <h2 class="text-2xl font-semibold text-gray-900 mb-3">Philosophie</h2>
@@ -71,7 +58,7 @@
             <section>
                 <h2 class="text-2xl font-semibold text-gray-900 mb-3">Technische Expertise</h2>
                 <div class="bg-white border border-gray-200 rounded p-6">
-                    <h3 class="font-semibold text-gray-900 mb-3">Mitarbeiter-Kompetenzen</h3>
+                    <h3 class="font-semibold text-gray-900 mb-3">Kompetenzen</h3>
                     <div class="grid md:grid-cols-2 gap-4">
                         <div>
                             <h4 class="text-sm font-semibold text-gray-700 mb-2">Programmierung & Systeme</h4>
