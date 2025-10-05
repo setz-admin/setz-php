@@ -26,6 +26,7 @@
                         <li>Python Development & Automation</li>
                         <li>Infrastructure as Code </li>
                         <li>Test-Driven Development & Quality Assurance</li>
+                        <li>KI unterstütze Entwicklung</li>
                     </ul>
                 </div>
 
@@ -38,6 +39,7 @@
                         <li>Design hochverfügbarer Systeme</li>
                         <li>Skalierungsanalyse & Optimierung</li>
                         <li>DevOps-Beratung und Coaching</li>
+                        <li>KI-Entwicklung und Coaching</li>
                     </ul>
                 </div>
             </div>
@@ -52,11 +54,12 @@
                 </div>
                 <div class="flex items-start">
                     <span class="inline-block w-2 h-2 bg-gray-400 rounded-full mt-2 mr-3"> </span>
-                    <span><i>Cloud:</i> AWS (CDK, Lambda, CloudFormation, EC2, S3, IAM, KMS)</span>
-                    <span><i>DevOps:</i> Docker, Ansible, Jenkins, GitLab CI/CD, GitHub Actions</span>
+                    <span><strong>Cloud:</strong> AWS (CDK, Lambda, CloudFormation, EC2, S3, IAM, KMS)</span>
+                    <span><strong>DevOps:</strong> Docker, Ansible, Jenkins, GitLab CI/CD, GitHub Actions</span>
                      <br>
-                    <span><i>Entwicklung:</i> Python, java, C Bash, SQL, REST </span>
-                    <span><i>Test: Testing:</i> pytest, Robot Framework, TDD</span>
+                    <span><strong>Entwicklung:</strong> Python, java, C Bash, SQL, REST </span>
+                    <span><strong>Testing:</strong> pytest, Robot Framework, TDD</span>
+                    <span><strong>KI Entwicklung:</strong> Claude, Gemini, Ollama</span>
                 </div>
             </div>
         </div>
