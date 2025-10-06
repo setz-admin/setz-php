@@ -1,0 +1,59 @@
+name: Deploy to Intranet
+
+on:
+  workflow_run:
+    workflows: ["Build and Push Release Image"]
+    types: [completed]
+
+jobs:
+  deploy:
+    runs-on: [self-hosted, intranet]
+    # Nur deployen wenn Docker Image Build erfolgreich war
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create .env file
+        run: |
+          if [ ! -f .env ]; then
+            cp .env.example .env
+            # Secrets aus GitHub Secrets einfügen
+            echo "APP_KEY=${{ secrets.APP_KEY }}" >> .env
+            echo "DB_DATABASE=${{ secrets.DB_DATABASE }}" >> .env
+            echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> .env
+            echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+          fi
+
+      - name: Pull latest Docker image
+        run: docker compose pull
+
+      - name: Deploy with Docker Compose
+        run: |
+          docker compose down
+          docker compose up -d --build
+
+      - name: Run migrations
+        run: docker compose exec -T app php artisan migrate --force
+
+      - name: Clear and optimize cache
+        run: |
+          docker compose exec -T app php artisan config:cache
+          docker compose exec -T app php artisan route:cache
+          docker compose exec -T app php artisan view:cache
+
+      - name: Health check
+        run: |
+          sleep 10
+          curl -f http://localhost:8000/health || exit 1
+
+      - name: Notify deployment status
+        if: always()
+        run: |
+          if [ ${{ job.status }} == 'success' ]; then
+            echo "✅ Deployment successful to Intranet"
+          else
+            echo "❌ Deployment failed"
+            exit 1
+          fi
