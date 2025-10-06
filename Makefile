@@ -22,6 +22,8 @@ gen_data:
 	./vendor/bin/sail php artisan migrate:fresh --seed 
 
 
+aserve:
+	php artisan serve --host=0.0.0.0 --port=8000
 
 #
 # Testing
