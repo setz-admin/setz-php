@@ -250,7 +250,7 @@ class PythonServiceClient
     public function testConnection(): bool
     {
         try {
-            $response = $this->client()->get('/api/v1/health');
+            $response = $this->client()->get('/health');
             return $response->successful();
         } catch (\Exception $e) {
             Log::warning('Python service connection test failed', [

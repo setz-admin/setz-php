@@ -16,11 +16,12 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-// Public health check
-Route::get('/chat/health', [ChatController::class, 'health'])->name('chat.health');
+// Chat API routes (no authentication required for now)
+// TODO: Add authentication later when needed
+Route::prefix('chat')->name('chat.')->group(function () {
+    // Health check
+    Route::get('/health', [ChatController::class, 'health'])->name('health');
 
-// Protected chat routes (require authentication)
-Route::middleware(['auth:sanctum'])->prefix('chat')->name('chat.')->group(function () {
     // Chat messages
     Route::post('/message', [ChatController::class, 'sendMessage'])->name('message');
 
