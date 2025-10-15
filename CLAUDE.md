@@ -4,7 +4,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Setz-PHP is a Laravel 12 appointment management application for scheduling appointments between customers and employees with service tracking and invoicing. Uses Laravel Breeze for authentication, Pest for testing, and supports both local Docker (Laravel Sail) and Coder Workspace environments.
+Setz-PHP is a Laravel 12 appointment management application with integrated RAG (Retrieval-Augmented Generation) chatbot functionality. The application manages appointments between customers and employees with service tracking and invoicing. It uses Laravel Breeze for authentication, Pest for testing, and supports both local Docker (Laravel Sail) and Coder Workspace environments.
+
+**NEW: RAG Integration** - Python-based document Q&A system:
+- Backend integration complete (PythonServiceClient + ChatController)
+- 9 API endpoints for chat, documents, and vector store
+- 8 integration tests passing
+- Frontend UI pending implementation
 
 ## Environment Detection
 
@@ -164,9 +170,52 @@ Tests use in-memory SQLite database (configured in `phpunit.xml`). Pest is the p
 
 All migrations must be compatible with both PostgreSQL and SQLite.
 
+## RAG Chatbot Integration
+
+### Backend Components (Complete)
+- **Service**: `app/Services/PythonServiceClient.php` - HTTP client for Python RAG service
+- **Controller**: `app/Http/Controllers/ChatController.php` - API proxy with 9 endpoints
+- **Routes**: `routes/api.php` - Chat API routes with Sanctum authentication
+- **Config**: `config/services.php` - Python service configuration
+- **Tests**: `tests/Feature/ChatIntegrationTest.php` - 8 integration tests
+
+### Frontend Components (Pending)
+- [ ] Chat interface (`resources/views/chat/index.blade.php`)
+- [ ] Document management (`resources/views/chat/documents.blade.php`)
+- [ ] Admin dashboard (`resources/views/admin/rag-stats.blade.php`)
+- [ ] Navigation integration
+
+### API Endpoints
+```
+GET  /api/chat/health                    - Health check (public)
+POST /api/chat/message                   - Send message (auth required)
+POST /api/chat/conversations             - Create conversation
+GET  /api/chat/conversations/{id}        - Get conversation
+GET  /api/chat/documents                 - List documents
+POST /api/chat/documents                 - Upload document
+GET  /api/chat/documents/{id}/status     - Document status
+DELETE /api/chat/documents/{id}          - Delete document
+GET  /api/chat/stats                     - Vector store stats
+```
+
+### Configuration
+Set in `.env`:
+```
+PYTHON_RAG_BASE_URL=http://localhost:8000
+PYTHON_RAG_TIMEOUT=30
+```
+
+### Related Documentation
+- Implementation Status: `IMPLEMENTATION_STATUS.md`
+- Python Service: `../setz-ki-webpage/IMPLEMENTATION_STATUS.md`
+- Requirements (German): `../setz-ki-webpage/req/README.md`
+
 ## Key Files
 
-- `routes/web.php` - All HTTP routes (resource routes for domain models)
+- `routes/web.php` - Web routes (resource routes for domain models)
+- `routes/api.php` - API routes including RAG chat endpoints
+- `app/Services/PythonServiceClient.php` - RAG service integration
+- `app/Http/Controllers/ChatController.php` - RAG API controller
 - `composer.json` - Composer scripts including `dev` for parallel development
 - `Makefile` - Common task shortcuts (all prefixed with `./vendor/bin/sail`)
 - `install.sh` - Environment-aware setup script

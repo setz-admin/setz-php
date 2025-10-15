@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'python_rag' => [
+        'base_url' => env('PYTHON_RAG_BASE_URL', 'http://localhost:8000'),
+        'timeout' => env('PYTHON_RAG_TIMEOUT', 30),
+    ],
+
 ];
