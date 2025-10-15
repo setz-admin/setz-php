@@ -8,6 +8,7 @@ use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\PageController;
+use App\Http\Controllers\ChatController;
 use Illuminate\Support\Facades\Route;
 
 // Public pages
@@ -24,6 +25,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->middleware('verified')->name('dashboard');
+
+    // RAG Chat interface
+    Route::get('/chat', function () {
+        return view('chat.index');
+    })->name('chat.index');
 
     // All resource routes for the models are now protected.
     Route::resource('customers', CustomerController::class);
