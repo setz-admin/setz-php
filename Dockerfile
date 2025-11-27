@@ -123,6 +123,10 @@ COPY docker/php/php.ini /usr/local/etc/php/conf.d/app.ini
 COPY docker/php/opcache.ini /usr/local/etc/php/conf.d/opcache.ini
 COPY docker/php/www.conf /usr/local/etc/php-fpm.d/www.conf
 
+# Copy nginx configuration
+COPY docker/nginx/nginx.conf /etc/nginx/nginx.conf
+
+
 # Copy vendor from builder
 COPY --from=php-builder /app/vendor ./vendor
 
@@ -140,10 +144,12 @@ RUN mkdir -p storage/framework/{sessions,views,cache} \
     && chmod -R 775 storage bootstrap/cache
 
 # Run Laravel optimization commands
-RUN php artisan config:cache \
-    && php artisan route:cache \
-    && php artisan view:cache \
-    && php artisan event:cache
+# NOTE: Config caching is disabled at build time to allow .env mounting at runtime
+# These commands can be run in entrypoint.sh if needed
+# RUN php artisan config:cache \
+#     && php artisan route:cache \
+#     && php artisan view:cache \
+#     && php artisan event:cache
 
 # Health check
 COPY docker/healthcheck.sh /usr/local/bin/healthcheck
@@ -151,11 +157,27 @@ RUN chmod +x /usr/local/bin/healthcheck
 HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
     CMD /usr/local/bin/healthcheck
 
+# Enable Startskript 
+COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+# Make tmp-file directories accessible to nginx
+RUN rm -f /var/lib/nginx/logs
+RUN mkdir -p /var/lib/nginx/tmp /var/lib/nginx/logs \
+    && chown -R www-data:www-data /var/lib/nginx \
+    && chmod -R 777 /var/lib/nginx
+
+
+
+
 # Switch to non-root user
 USER www-data
 
 # Expose port 9000 for PHP-FPM
 EXPOSE 9000
 
-# Start PHP-FPM
-CMD ["php-fpm"]
+
+# Start PHP-FPM  and nginx
+CMD ["/usr/local/bin/entrypoint.sh"]
+#CMD ["php-fpm"]
+

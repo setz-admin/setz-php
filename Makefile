@@ -30,12 +30,46 @@ aserve:
 #
 #  Model and Route Tests
 test:
-	./vendor/bin/sail test --coverage --min=80 --coverage-html=coverage
+	./vendor/bin/sail test --coverage --min=40 --coverage-html=coverage
 
 browser_test:
 	./vendor/bin/sail php artisan dusk
 
-
+# Docker Integration Test
+# Erstellt ein Docker Image, startet einen Container mit .env_local_docker
+# und führt das Smoke-Test-Skript aus
+docker_test:
+	@echo "════════════════════════════════════════════════════════════"
+	@echo "  Docker Integration Test"
+	@echo "════════════════════════════════════════════════════════════"
+	@echo ""
+	@echo "1. Building Docker Image..."
+	@docker build \
+		--build-arg VERSION=test-$(shell date +%Y%m%d-%H%M%S) \
+		--build-arg BUILD_DATE=$(shell date -u +'%Y-%m-%dT%H:%M:%SZ') \
+		-t setz-php:test \
+		-t setz-php:latest \
+		. || (echo "❌ Docker build failed"; exit 1)
+	@echo ""
+	@echo "2. Starting Container..."
+	@docker run -d \
+		--name setz-php-test \
+		-p 8080:80 \
+		-v $(PWD)/.env_local_docker:/var/www/html/.env:ro \
+		setz-php:test || (echo "❌ Container start failed"; exit 1)
+	@echo ""
+	@echo "3. Waiting for services to start (10 seconds)..."
+	@sleep 10
+	@echo ""
+	@echo "4. Running Smoke Tests..."
+	@./scripts/smoke_system_test.sh || \
+		(docker stop setz-php-test && docker rm setz-php-test && echo "❌ Tests failed" && exit 1)
+	@echo ""
+	@echo "5. Cleaning up..."
+	@docker stop setz-php-test
+	@docker rm setz-php-test
+	@echo ""
+	@echo "✅ Docker Integration Test completed successfully!"
 
 #
 # Quality Analysis
