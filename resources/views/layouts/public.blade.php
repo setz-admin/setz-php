@@ -197,5 +197,32 @@
         </main>
         </div>
     </div>
+
+    @if(config('services.chat_widget.enabled'))
+    <!-- Widget Configuration -->
+    <script>
+        window.ChatWidgetConfig = {
+            webhook: {
+                url: '{{ config('services.chat_widget.webhook_url') }}',
+                route: '{{ config('services.chat_widget.webhook_route') }}'
+            },
+            branding: {
+                logo: '{{ config('services.chat_widget.branding.logo') }}',
+                name: '{{ config('services.chat_widget.branding.name') }}',
+                welcomeText: '{{ config('services.chat_widget.branding.welcome_text') }}',
+                responseTimeText: '{{ config('services.chat_widget.branding.response_time_text') }}'
+            },
+            style: {
+                primaryColor: '{{ config('services.chat_widget.style.primary_color') }}',
+                secondaryColor: '{{ config('services.chat_widget.style.secondary_color') }}',
+                position: '{{ config('services.chat_widget.style.position') }}',
+                backgroundColor: '{{ config('services.chat_widget.style.background_color') }}',
+                fontColor: '{{ config('services.chat_widget.style.font_color') }}'
+            }
+        };
+    </script>
+    <script src="{{ asset(config('services.chat_widget.script_url')) }}"></script>
+    @endif
+
 </body>
 </html>

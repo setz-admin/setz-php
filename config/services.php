@@ -40,4 +40,24 @@ return [
         'timeout' => env('PYTHON_RAG_TIMEOUT', 30),
     ],
 
+    'chat_widget' => [
+        'enabled' => env('CHAT_WIDGET_ENABLED', false),
+        'webhook_url' => env('CHAT_WIDGET_WEBHOOK_URL', 'https://n8n.setz.de/webhook/8245fc59-b868-48d7-883d-1ca58334958d/chat'),
+        'webhook_route' => env('CHAT_WIDGET_WEBHOOK_ROUTE', 'general'),
+        'script_url' => env('CHAT_WIDGET_SCRIPT_URL', 'js/chat-widget.js'),
+        'branding' => [
+            'logo' => env('CHAT_WIDGET_LOGO', 'https://setz.de/img/logo_transl.gif'),
+            'name' => env('CHAT_WIDGET_NAME', 'EDV Integration Dr. Setz'),
+            'welcome_text' => env('CHAT_WIDGET_WELCOME_TEXT', '<br>'),
+            'response_time_text' => env('CHAT_WIDGET_RESPONSE_TEXT', 'Setz AI Chat'),
+        ],
+        'style' => [
+            'primary_color' => env('CHAT_WIDGET_PRIMARY_COLOR', '#dbd21f'),
+            'secondary_color' => env('CHAT_WIDGET_SECONDARY_COLOR', '#5fd43f'),
+            'position' => env('CHAT_WIDGET_POSITION', 'right'),
+            'background_color' => env('CHAT_WIDGET_BG_COLOR', '#ffffff'),
+            'font_color' => env('CHAT_WIDGET_FONT_COLOR', '#333333'),
+        ],
+    ],
+
 ];

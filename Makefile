@@ -72,6 +72,14 @@ docker_test:
 	@echo "✅ Docker Integration Test completed successfully!"
 
 #
+# Client
+#
+
+# Start a browser ignoring CORS security for development tests on localhost
+start_dev_browser:
+	open -na "Google Chrome" --args --disable-web-security --user-data-dir="/tmp/chrome_dev"
+
+#
 # Quality Analysis
 #
 
