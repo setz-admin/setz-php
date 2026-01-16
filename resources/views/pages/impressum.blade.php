@@ -31,7 +31,7 @@
                 <div class="bg-white border border-gray-200 rounded p-6">
                     <p>
                         E-Mail: <a href="mailto:info@setz.de" class="text-blue-600 hover:text-blue-800">info@setz.de</a><br>
-                        Web: <a href="https://www.setz.de" class="text-blue-600 hover:text-blue-800">www.setz.de</a>
+                        Web: <a href="https://setz.de" class="text-blue-600 hover:text-blue-800">setz.de</a>
                     </p>
                 </div>
             </section>

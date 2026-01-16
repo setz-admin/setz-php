@@ -37,8 +37,8 @@
 
                         <div>
                             <h3 class="text-sm font-semibold text-gray-700 mb-1">Web</h3>
-                            <a href="https://www.setz.de" class="text-sm text-blue-600 hover:text-blue-800">
-                                www.setz.de
+                            <a href="https://setz.de" class="text-sm text-blue-600 hover:text-blue-800">
+                                setz.de
                             </a>
                         </div>
                     </div>
